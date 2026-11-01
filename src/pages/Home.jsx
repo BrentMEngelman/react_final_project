@@ -1,73 +1,68 @@
-import React, { useEffect, useState } from "react";
-import { Link,  useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
+import React, { useMemo } from "react";
+import MovieCard from "../components/ui/MovieCard";
+import Pagination from "../components/Pagination";
 
-const url = "https://jsonplaceholder.typicode.com/users";
-
-const Home = () => {
-  let navigate = useNavigate();
-
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState();
-
-  async function fetchPosts() {
-    setLoading(true);
-    const { data } = await axios.get(url);
-    console.log(data);
-    setPosts(data);
-    setLoading(false);
-  }
-  useEffect(() => {
-    fetchPosts();
-  }, []);
+export default function Home({
+  movies,
+  activeSearch,
+  totalResults,
+  currentPage,
+  onPageChange,
+  sortOption,
+  setSortOption,
+  loading,
+  error,
+}) {
+  const sortedMovies = useMemo(() => {
+    let list = [...movies];
+    return list.sort((a, b) => {
+      if (sortOption === "a-z") return a.Title.localeCompare(b.Title);
+      if (sortOption === "z-a") return b.Title.localeCompare(a.Title);
+      if (sortOption === "oldest") return parseInt(a.Year, 10) - parseInt(b.Year, 10);
+      if (sortOption === "newest") return parseInt(b.Year, 10) - parseInt(a.Year, 10);
+      return 0;
+    });
+  }, [movies, sortOption]);
 
   return (
-    <div className="container">
-      <div className="row">
-        <div className="user-list">
-          {loading
-            ? new Array(10).fill(0).map((element, index) => (
-                <div className="user-card__container" key={index}>
-                  <div className="user-card__title">
-                    <div className="user-card__title--skeleton"></div>
-                  </div>
-                  <div className="user-card__body">
-                    <p className="user-card___body--skeleton">
-                      <b>Email:</b>
-                    </p>
-                    <p className="user-card___body--skeleton">
-                      <b>Phone:</b>
-                    </p>
-                    <p className="user-card___body--skeleton">
-                      <b>Website:</b>
-                    </p>
-                  </div>
-                </div>
-              ))
-            : posts.map((user) => (
-                <div key={user.id} className="user" onClick={() => navigate(`${user.id}`)} >
-                    <div className="user-card">
-                      <div className="user-card__container">
-                        <h3>{user.name}</h3>
-                        <p>
-                          <b>Email:</b> {user.email}
-                        </p>
-                        <p>
-                          <b>Phone:</b> {user.phone}
-                        </p>
-                        <p>
-                          <b>Website:</b>
-                          {user.website}
-                        </p>
-                      </div>
-                    </div>
+    <>
+      <div className="controls">
+        <p className="resultsInfo">
+          <span>Showing: </span>
+          <span>{activeSearch}</span>
+        </p>
 
-                </div>
-              ))}
-        </div>
+        <select
+          id="sortSelect"
+          value={sortOption}
+          onChange={(e) => setSortOption(e.target.value)}
+        >
+          <option value="a-z">A to Z</option>
+          <option value="z-a">Z to A</option>
+          <option value="newest">Newest to Oldest</option>
+          <option value="oldest">Oldest to Newest</option>
+        </select>
       </div>
-    </div>
-  );
-};
 
-export default Home;
+      {loading && <p style={{ textAlign: "center" }}>Loading movies...</p>}
+
+      {!loading && error && <p style={{ textAlign: "center" }}>{error}</p>}
+
+      {!loading && !error && (
+        <>
+          <div className="movies-grid">
+            {sortedMovies.map((movie) => (
+              <MovieCard key={movie.imdbID} movie={movie} />
+            ))}
+          </div>
+
+          <Pagination
+            totalResults={totalResults}
+            currentPage={currentPage}
+            onPageChange={onPageChange}
+          />
+        </>
+      )}
+    </>
+  );
+}
