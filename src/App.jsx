@@ -2,20 +2,20 @@ import React, { useState, useEffect, useCallback } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
-import MovieDetails from "./pages/MovieDetails";
-import { searchMovies } from "./services/omdbApi";
+import MovieDetails from "./components/ui/MovieDetails";
+import { searchMovies } from "./sevices/omdbApi";
 
 export default function App() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeSearch, setActiveSearch] = useState("Marvel");
   const [selectedType, setSelectedType] = useState("");
   const [knownTypes, setKnownTypes] = useState(new Set());
-  
+
   const [movies, setMovies] = useState([]);
   const [totalResults, setTotalResults] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOption, setSortOption] = useState("a-z");
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
