@@ -2,8 +2,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
-import MovieDetails from "./components/ui/MovieDetails";
-import { searchMovies } from "./sevices/omdbApi";
+import MovieDetails from "./pages/MovieDetails";
+import { searchMovies } from "./services/omdbApi";
 
 export default function App() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -24,7 +24,6 @@ export default function App() {
     setError(null);
 
     const queryToFetch = query.trim() || "Marvel";
-    setActiveSearch(queryToFetch);
 
     const data = await searchMovies(queryToFetch, page, type);
 
@@ -46,17 +45,16 @@ export default function App() {
     setLoading(false);
   }, []);
 
-  // Initial fetch on mount or page/type change
+  // Fetch whenever activeSearch, currentPage, or selectedType changes (Satisfies exhaustive-deps)
   useEffect(() => {
-    executeSearch(searchTerm, currentPage, selectedType);
-  }, [currentPage, selectedType]);
+    executeSearch(activeSearch, currentPage, selectedType);
+  }, [activeSearch, currentPage, selectedType, executeSearch]);
 
   const handleSearchSubmit = () => {
     setCurrentPage(1);
-    executeSearch(searchTerm, 1, selectedType);
+    setActiveSearch(searchTerm); // Updates activeSearch, which safely triggers the useEffect
   };
 
-  // Reset to page 1 whenever the type filter changes
   const handleTypeChange = (type) => {
     setSelectedType(type);
     setCurrentPage(1);
