@@ -10,12 +10,12 @@ export default function App() {
   const [activeSearch, setActiveSearch] = useState("Marvel");
   const [selectedType, setSelectedType] = useState("");
   const [knownTypes, setKnownTypes] = useState(new Set());
-
+  
   const [movies, setMovies] = useState([]);
   const [totalResults, setTotalResults] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOption, setSortOption] = useState("a-z");
-
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -46,7 +46,7 @@ export default function App() {
     setLoading(false);
   }, []);
 
-  // Initial fetch on mount or type change
+  // Initial fetch on mount or page/type change
   useEffect(() => {
     executeSearch(searchTerm, currentPage, selectedType);
   }, [currentPage, selectedType]);
@@ -56,13 +56,19 @@ export default function App() {
     executeSearch(searchTerm, 1, selectedType);
   };
 
+  // Reset to page 1 whenever the type filter changes
+  const handleTypeChange = (type) => {
+    setSelectedType(type);
+    setCurrentPage(1);
+  };
+
   return (
     <Router>
       <Layout
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
         selectedType={selectedType}
-        setSelectedType={setSelectedType}
+        setSelectedType={handleTypeChange}
         knownTypes={knownTypes}
         onSearchSubmit={handleSearchSubmit}
       >
